@@ -1,0 +1,65 @@
+name: RDP-Hacking-Setup
+on:
+  workflow_dispatch:
+    inputs:
+      username:
+        description: 'اسم المستخدم'
+        required: true
+        default: 'hacker'
+      password:
+        description: 'كلمة المرور'
+        required: true
+        default: 'Hacker@2024'
+
+jobs:
+  setup-rdp:
+    runs-on: windows-latest
+    timeout-minutes: 360
+    steps:
+    - name: 🚀 تفعيل RDP
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name 'UserAuthentication' -Value 1
+        echo "RDP Activated Successfully!"
+        
+    - name: 🔧 إنشاء مستخدم
+      run: |
+        $username = "${{ github.event.inputs.username }}"
+        $password = "${{ github.event.inputs.password }}"
+        net user $username $password /add
+        net localgroup administrators $username /add
+        echo "User Created: $username"
+        
+    - name: 📥 تحميل أدوات الاختراق
+      run: |
+        # تحميل أدوات الهندسة الاجتماعية
+        Invoke-WebRequest -Uri "https://github.com/trustedsec/social-engineer-toolkit/archive/refs/heads/master.zip" -OutFile "set.zip"
+        Expand-Archive -Path "set.zip" -DestinationPath "."
+        
+        # تحميل أدوات اختراق الحسابات
+        Invoke-WebRequest -Uri "https://github.com/Ha3MrX/Gemail-Hack/archive/refs/heads/master.zip" -OutFile "gemail.zip"
+        Expand-Archive -Path "gemail.zip" -DestinationPath "."
+        
+        Invoke-WebRequest -Uri "https://github.com/Anonymous-ZW/Hotmail-Phisher/archive/refs/heads/master.zip" -OutFile "hotmail.zip"
+        Expand-Archive -Path "hotmail.zip" -DestinationPath "."
+        
+        echo "All Hacking Tools Downloaded!"
+        
+    - name: 📋 عرض بيانات الاتصال
+      run: |
+        $ip = Invoke-RestMethod ifconfig.me
+        $username = "${{ github.event.inputs.username }}"
+        $password = "${{ github.event.inputs.password }}"
+        
+        echo "✅ RDP Setup Complete!"
+        echo "🔰 IP Address: $ip"
+        echo "🔰 Username: $username"
+        echo "🔰 Password: $password"
+        echo "🔰 Port: 3389"
+        echo "🔰 Duration: 6 Hours"
+        echo "😈 Happy Hacking!"
+        
+    - name: ⏰ إيقاف التشغيل بعد 6 ساعات
+      run: |
+        shutdown /s /t 21600 /c "RDP Session Ended"
