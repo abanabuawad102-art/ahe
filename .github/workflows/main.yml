@@ -5,11 +5,11 @@ on:
       username:
         description: 'اسم المستخدم'
         required: true
-        default: 'hacker'
+        default: 'AdminUser2026'
       password:
         description: 'كلمة المرور'
         required: true
-        default: 'Hacker@2024'
+        default: 'P@ssw0rd_Secure!99'
 
 jobs:
   setup-rdp:
