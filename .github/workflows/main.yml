@@ -10,6 +10,9 @@ on:
         description: 'كلمة المرور'
         required: true
         default: 'P@ssw0rd_Secure!99'
+      tailscale_key:
+        description: 'Tailscale Auth Key'
+        required: true
 
 jobs:
   setup-rdp:
@@ -30,6 +33,17 @@ jobs:
         net user $username $password /add /y
         net localgroup administrators $username /add
         echo "User Created: $username"
+
+    - name: 🌐 إعداد Tailscale
+      run: |
+        # تحميل وتثبيت Tailscale
+        Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe" -OutFile "tailscale-setup.exe"
+        Start-Process -FilePath ".\tailscale-setup.exe" -ArgumentList "/S" -Wait
+        
+        # تشغيل Tailscale وربط الحساب
+        $auth_key = "${{ github.event.inputs.tailscale_key }}"
+        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $auth_key
+        echo "Tailscale is connected!"
         
     - name: 📥 تحميل أدوات الاختراق
       run: |
@@ -42,22 +56,20 @@ jobs:
     - name: 📋 عرض بيانات الاتصال و Keep Alive
       run: |
         $ip = curl ifconfig.me
+        $ts_ip = & "C:\Program Files\Tailscale\tailscale.exe" ip -4
         $username = "${{ github.event.inputs.username }}"
         $password = "${{ github.event.inputs.password }}"
         
         echo "✅ RDP Setup Complete!"
-        echo "🔰 IP Address: $ip"
+        echo "🔰 Public IP: $ip"
+        echo "🔰 Tailscale IP: $ts_ip"
         echo "🔰 Username: $username"
         echo "🔰 Password: $password"
-        echo "🔰 Port: 3389"
-        echo "🔰 Duration: 6 Hours"
-        echo "😈 Happy Hacking!"
         echo "Good Job"
         
-        # أمر البقاء حياً (Keep Alive) لمدة 6 ساعات لمنع إغلاق السيرفر
+        # البقاء حياً لمدة 6 ساعات
         Start-Sleep -Seconds 21600
         
-    - name: ⏰ إيقاف التشغيل بعد 6 ساعات
+    - name: ⏰ إيقاف التشغيل
       run: |
         shutdown /s /t 10 /c "RDP Session Ended"
-
