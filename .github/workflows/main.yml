@@ -27,29 +27,21 @@ jobs:
       run: |
         $username = "${{ github.event.inputs.username }}"
         $password = "${{ github.event.inputs.password }}"
-        # تم إضافة /y لتجاوز رسالة التأكيد
         net user $username $password /add /y
         net localgroup administrators $username /add
         echo "User Created: $username"
         
     - name: 📥 تحميل أدوات الاختراق
       run: |
-        # تحميل أدوات الهندسة الاجتماعية (رابط بديل يعمل)
         Invoke-WebRequest -Uri "https://github.com/trustedsec/social-engineer-toolkit/archive/refs/heads/master.zip" -OutFile "set.zip" -ErrorAction SilentlyContinue
-        
-        # تحميل أدوات اختبار الاختراق (بدائل للروابط المعطلة 404)
         Invoke-WebRequest -Uri "https://github.com/sqlmapproject/sqlmap/archive/refs/heads/master.zip" -OutFile "sqlmap.zip" -ErrorAction SilentlyContinue
-        
         Invoke-WebRequest -Uri "https://github.com/lanmaster53/recon-ng/archive/refs/heads/master.zip" -OutFile "recon.zip" -ErrorAction SilentlyContinue
-        
-        # فك الضغط عن الملفات التي تم تحميلها بنجاح فقط
         Get-ChildItem *.zip | ForEach-Object { Expand-Archive -Path $_.Name -DestinationPath "." -Force -ErrorAction SilentlyContinue }
-        
         echo "All Working Tools Downloaded!"
         
-    - name: 📋 عرض بيانات الاتصال
+    - name: 📋 عرض بيانات الاتصال و Keep Alive
       run: |
-        $ip = Invoke-RestMethod ifconfig.me
+        $ip = curl ifconfig.me
         $username = "${{ github.event.inputs.username }}"
         $password = "${{ github.event.inputs.password }}"
         
@@ -60,7 +52,12 @@ jobs:
         echo "🔰 Port: 3389"
         echo "🔰 Duration: 6 Hours"
         echo "😈 Happy Hacking!"
+        echo "Good Job"
+        
+        # أمر البقاء حياً (Keep Alive) لمدة 6 ساعات لمنع إغلاق السيرفر
+        Start-Sleep -Seconds 21600
         
     - name: ⏰ إيقاف التشغيل بعد 6 ساعات
       run: |
-        shutdown /s /t 21600 /c "RDP Session Ended"
+        shutdown /s /t 10 /c "RDP Session Ended"
+
