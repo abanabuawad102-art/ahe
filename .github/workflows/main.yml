@@ -27,7 +27,8 @@ jobs:
       run: |
         $username = "${{ github.event.inputs.username }}"
         $password = "${{ github.event.inputs.password }}"
-        net user $username $password /add
+        # تم إضافة /y هنا لتجاوز رسالة التأكيد
+        net user $username $password /add /y
         net localgroup administrators $username /add
         echo "User Created: $username"
         
