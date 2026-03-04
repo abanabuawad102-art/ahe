@@ -1,22 +1,22 @@
-name: RDP-Hacking-Setup
+name: Windows-11-Fun-RDP
 on:
   workflow_dispatch:
     inputs:
       username:
         description: 'اسم المستخدم'
         required: true
-        default: 'AdminUser2026'
+        default: 'fun_user'
       password:
         description: 'كلمة المرور'
         required: true
-        default: 'P@ssw0rd_Secure!99'
+        default: 'Fun@2024'
       tailscale_key:
-        description: 'Tailscale Auth Key'
+        description: 'مفتاح Tailscale'
         required: true
 
 jobs:
-  setup-rdp:
-    runs-on: windows-latest
+  setup-windows11:
+    runs-on: windows-11
     timeout-minutes: 360
     steps:
     - name: 🚀 تفعيل RDP
@@ -30,46 +30,77 @@ jobs:
       run: |
         $username = "${{ github.event.inputs.username }}"
         $password = "${{ github.event.inputs.password }}"
+        # تم إضافة /y هنا لتجاوز مشكلة طول كلمة المرور
         net user $username $password /add /y
         net localgroup administrators $username /add
         echo "User Created: $username"
-
-    - name: 🌐 إعداد Tailscale
-      run: |
-        # تحميل وتثبيت Tailscale
-        Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe" -OutFile "tailscale-setup.exe"
-        Start-Process -FilePath ".\tailscale-setup.exe" -ArgumentList "/S" -Wait
         
-        # تشغيل Tailscale وربط الحساب
-        $auth_key = "${{ github.event.inputs.tailscale_key }}"
-        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $auth_key
-        echo "Tailscale is connected!"
-        
-    - name: 📥 تحميل أدوات الاختراق
+    - name: 💻 تفعيل Tailscale
       run: |
-        Invoke-WebRequest -Uri "https://github.com/trustedsec/social-engineer-toolkit/archive/refs/heads/master.zip" -OutFile "set.zip" -ErrorAction SilentlyContinue
-        Invoke-WebRequest -Uri "https://github.com/sqlmapproject/sqlmap/archive/refs/heads/master.zip" -OutFile "sqlmap.zip" -ErrorAction SilentlyContinue
-        Invoke-WebRequest -Uri "https://github.com/lanmaster53/recon-ng/archive/refs/heads/master.zip" -OutFile "recon.zip" -ErrorAction SilentlyContinue
-        Get-ChildItem *.zip | ForEach-Object { Expand-Archive -Path $_.Name -DestinationPath "." -Force -ErrorAction SilentlyContinue }
-        echo "All Working Tools Downloaded!"
+        Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/windows/amd64/tailscale-ipn-setup.exe" -OutFile "tailscale.exe"
+        Start-Process -FilePath "tailscale.exe" -ArgumentList "/S" -Wait
         
-    - name: 📋 عرض بيانات الاتصال و Keep Alive
+        $tailscale_key = "${{ github.event.inputs.tailscale_key }}"
+        # استخدام المسار الكامل لضمان عمل الأداة
+        & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $tailscale_key
+        
+        echo "Tailscale Activated!"
+        
+    - name: 📥 تحميل أدوات ممتعة
       run: |
-        $ip = curl ifconfig.me
-        $ts_ip = & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+        # تحميل أدوات ممتعة
+        Invoke-WebRequest -Uri "https://github.com/microsoft/PowerToys/archive/refs/heads/master.zip" -OutFile "powertoys.zip"
+        Expand-Archive -Path "powertoys.zip" -DestinationPath "."
+        
+        Invoke-WebRequest -Uri "https://github.com/microsoft/terminal/archive/refs/heads/master.zip" -OutFile "terminal.zip"
+        Expand-Archive -Path "terminal.zip" -DestinationPath "."
+        
+        echo "Fun Tools Downloaded!"
+        
+    - name: 💾 حفظ البيانات في GitHub
+      run: |
+        New-Item -ItemType Directory -Path "C:\fun-session"
+        
+        $ip = Invoke-RestMethod ifconfig.me
         $username = "${{ github.event.inputs.username }}"
         $password = "${{ github.event.inputs.password }}"
         
-        echo "✅ RDP Setup Complete!"
-        echo "🔰 Public IP: $ip"
-        echo "🔰 Tailscale IP: $ts_ip"
+        Add-Content -Path "C:\fun-session\session.txt" -Value "IP: $ip"
+        Add-Content -Path "C:\fun-session\session.txt" -Value "Username: $username"
+        Add-Content -Path "C:\fun-session\session.txt" -Value "Password: $password"
+        Add-Content -Path "C:\fun-session\session.txt" -Value "Tailscale IP: $(& 'C:\Program Files\Tailscale\tailscale.exe' ip -4)"
+        
+        echo "Session Data Saved!"
+        
+    - name: 📋 عرض بيانات الاتصال
+      run: |
+        $ip = Invoke-RestMethod ifconfig.me
+        $username = "${{ github.event.inputs.username }}"
+        $password = "${{ github.event.inputs.password }}"
+        
+        echo "✅ Windows 11 Fun Setup Complete!"
+        echo "🔰 IP Address: $ip"
+        echo "🔰 Tailscale IP: $(& 'C:\Program Files\Tailscale\tailscale.exe' ip -4)"
         echo "🔰 Username: $username"
         echo "🔰 Password: $password"
+        echo "🔰 Port: 3389"
+        echo "🔰 RAM: 16GB"
+        echo "🔰 Duration: 6 Hours"
+        echo "😄 Have Fun!"
         echo "Good Job"
         
-        # البقاء حياً لمدة 6 ساعات
+        # إضافة Keep Alive هنا لمنع السيرفر من الإغلاق
         Start-Sleep -Seconds 21600
         
-    - name: ⏰ إيقاف التشغيل
+    - name: 🔄 استعادة الجلسة السابقة
       run: |
-        shutdown /s /t 10 /c "RDP Session Ended"
+        if (Test-Path "C:\fun-session\session.txt") {
+            echo "Previous session found!"
+            Get-Content "C:\fun-session\session.txt"
+        } else {
+            echo "No previous session found."
+        }
+        
+    - name: ⏰ إيقاف التشغيل بعد 6 ساعات
+      run: |
+        shutdown /s /t 10 /c "Fun Session Ended"
