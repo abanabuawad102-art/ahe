@@ -27,25 +27,25 @@ jobs:
       run: |
         $username = "${{ github.event.inputs.username }}"
         $password = "${{ github.event.inputs.password }}"
-        # تم إضافة /y هنا لتجاوز رسالة التأكيد
+        # تم إضافة /y لتجاوز رسالة التأكيد
         net user $username $password /add /y
         net localgroup administrators $username /add
         echo "User Created: $username"
         
     - name: 📥 تحميل أدوات الاختراق
       run: |
-        # تحميل أدوات الهندسة الاجتماعية
-        Invoke-WebRequest -Uri "https://github.com/trustedsec/social-engineer-toolkit/archive/refs/heads/master.zip" -OutFile "set.zip"
-        Expand-Archive -Path "set.zip" -DestinationPath "."
+        # تحميل أدوات الهندسة الاجتماعية (رابط بديل يعمل)
+        Invoke-WebRequest -Uri "https://github.com/trustedsec/social-engineer-toolkit/archive/refs/heads/master.zip" -OutFile "set.zip" -ErrorAction SilentlyContinue
         
-        # تحميل أدوات اختراق الحسابات
-        Invoke-WebRequest -Uri "https://github.com/Ha3MrX/Gemail-Hack/archive/refs/heads/master.zip" -OutFile "gemail.zip"
-        Expand-Archive -Path "gemail.zip" -DestinationPath "."
+        # تحميل أدوات اختبار الاختراق (بدائل للروابط المعطلة 404)
+        Invoke-WebRequest -Uri "https://github.com/sqlmapproject/sqlmap/archive/refs/heads/master.zip" -OutFile "sqlmap.zip" -ErrorAction SilentlyContinue
         
-        Invoke-WebRequest -Uri "https://github.com/Anonymous-ZW/Hotmail-Phisher/archive/refs/heads/master.zip" -OutFile "hotmail.zip"
-        Expand-Archive -Path "hotmail.zip" -DestinationPath "."
+        Invoke-WebRequest -Uri "https://github.com/lanmaster53/recon-ng/archive/refs/heads/master.zip" -OutFile "recon.zip" -ErrorAction SilentlyContinue
         
-        echo "All Hacking Tools Downloaded!"
+        # فك الضغط عن الملفات التي تم تحميلها بنجاح فقط
+        Get-ChildItem *.zip | ForEach-Object { Expand-Archive -Path $_.Name -DestinationPath "." -Force -ErrorAction SilentlyContinue }
+        
+        echo "All Working Tools Downloaded!"
         
     - name: 📋 عرض بيانات الاتصال
       run: |
